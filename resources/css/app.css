@@ -1,0 +1,125 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+/* App-specific tweaks (keep lightweight; shared-hosting friendly). */
+body {
+    background-color: #f8f9fa;
+}
+
+:root {
+    --lms-primary: #0d6efd;
+}
+
+.btn-primary {
+    background-color: var(--lms-primary);
+    border-color: var(--lms-primary);
+}
+.btn-outline-primary {
+    color: var(--lms-primary);
+    border-color: var(--lms-primary);
+}
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background-color: var(--lms-primary);
+    border-color: var(--lms-primary);
+}
+.link-primary,
+.nav-link.active {
+    color: var(--lms-primary) !important;
+}
+
+/* Admin layout */
+.admin-shell {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+}
+.admin-sidebar {
+    background: linear-gradient(180deg, #0b1b2b 0%, #07111c 100%);
+    color: #fff;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+.admin-brand {
+    padding: 16px 16px 8px;
+}
+.admin-subtitle {
+    font-size: 12px;
+    opacity: 0.8;
+}
+.admin-nav {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.admin-nav-link {
+    display: block;
+    padding: 10px 12px;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    background: transparent;
+}
+.admin-nav-link:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+.admin-nav-link.active {
+    background: rgba(13, 110, 253, 0.18);
+    border: 1px solid rgba(13, 110, 253, 0.35);
+    color: #fff;
+}
+.admin-nav-link.disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    user-select: none;
+}
+.admin-nav-section {
+    margin-top: 8px;
+    padding: 10px 12px 2px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.7;
+}
+.admin-sidebar-footer {
+    margin-top: auto;
+    padding: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.admin-main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.admin-topbar {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 12px 12px;
+}
+.admin-search {
+    width: 280px;
+}
+.admin-pagehead {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    padding: 14px 0;
+}
+.admin-content {
+    flex: 1;
+}
+
+@media (max-width: 991.98px) {
+    .admin-shell {
+        grid-template-columns: 1fr;
+    }
+    .admin-sidebar {
+        display: none;
+    }
+    .admin-search {
+        display: none;
+    }
+}
