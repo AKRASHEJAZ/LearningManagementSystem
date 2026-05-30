@@ -1,0 +1,76 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - main
+      - CI/CD-Pipeline
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          script_stop: true
+          script: |
+            set -e
+
+            APP_DIR="$HOME/domains/learn.gcmattendanceportal.com/public_html"
+            BRANCH="main"
+            REPO_URL="https://github.com/${{ github.repository }}.git"
+            GH_AUTH="$(printf "x-access-token:${{ secrets.GITHUB_TOKEN }}" | base64 | tr -d '\n')"
+
+            reclone_repo() {
+              BACKUP_DIR=""
+              if [ -d "$APP_DIR" ] && [ -n "$(ls -A "$APP_DIR" 2>/dev/null)" ]; then
+                BACKUP_DIR="${APP_DIR}_backup_$(date +%Y%m%d%H%M%S)"
+                mv "$APP_DIR" "$BACKUP_DIR"
+              fi
+
+              git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $GH_AUTH" \
+                clone --branch "$BRANCH" --single-branch "$REPO_URL" "$APP_DIR"
+
+              if [ -n "$BACKUP_DIR" ] && [ -f "$BACKUP_DIR/.env" ] && [ ! -f "$APP_DIR/.env" ]; then
+                cp "$BACKUP_DIR/.env" "$APP_DIR/.env"
+              fi
+            }
+
+            if [ ! -d "$APP_DIR/.git" ]; then
+              reclone_repo
+            fi
+
+            cd "$APP_DIR"
+
+            # Broken repo safeguard: .git exists but all files are untracked.
+            TRACKED_COUNT="$(git ls-files | wc -l | tr -d ' ')"
+            if [ "$TRACKED_COUNT" = "0" ] && [ -n "$(find . -mindepth 1 -maxdepth 1 ! -name .git -print -quit)" ]; then
+              cd "$HOME"
+              reclone_repo
+              cd "$APP_DIR"
+            fi
+
+            git remote set-url origin "$REPO_URL"
+            git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $GH_AUTH" fetch origin "$BRANCH"
+            if ! git checkout "$BRANCH"; then
+              cd "$HOME"
+              reclone_repo
+              cd "$APP_DIR"
+            fi
+            git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $GH_AUTH" pull origin "$BRANCH"
+
+            composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
+            if [ -f package.json ] && command -v npm >/dev/null 2>&1; then
+              npm ci
+              npm run build
+            fi
+            php artisan config:clear
+            php artisan migrate --force
+            php artisan optimize:clear
+            php artisan optimize
