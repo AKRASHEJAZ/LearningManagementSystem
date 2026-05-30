@@ -19,7 +19,9 @@ A practical, community-driven learning platform built for a college environment 
 
 ## Local Setup (Dev)
 
-Prereqs: PHP + Composer + Node.js + npm.
+Prereqs: PHP 8.2.x, Composer, Node.js, and npm.
+
+Deployment target: shared hosting with PHP 8.2.x.
 
 1) Install PHP deps
 - `composer install`
