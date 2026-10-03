@@ -66,11 +66,18 @@ jobs:
             fi
             git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $GH_AUTH" pull origin "$BRANCH"
 
+            if [ -f .env ]; then
+              # Automatically patch the remote .env to use file caching instead of database
+              sed -i 's/CACHE_STORE=database/CACHE_STORE=file/g' .env
+              sed -i 's/QUEUE_CONNECTION=database/QUEUE_CONNECTION=sync/g' .env
+            fi
+
             composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
             if [ -f package.json ] && command -v npm >/dev/null 2>&1; then
               npm ci
               npm run build
             fi
+
             php artisan config:clear
             php artisan migrate --force
             php artisan optimize:clear
