@@ -79,6 +79,9 @@ jobs:
 
             php artisan config:clear
             php artisan migrate --force
-            php artisan storage:link
+            
+            # Create storage symlink manually because Hostinger disables PHP exec() and symlink()
+            ln -sfn "$APP_DIR/storage/app/public" "$APP_DIR/public/storage"
+            
             php artisan optimize:clear
             php artisan optimize
