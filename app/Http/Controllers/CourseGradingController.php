@@ -23,12 +23,24 @@ class CourseGradingController extends Controller
             ->orderBy('position')
             ->get();
 
-        $students = CourseEnrollment::query()
+        $user = request()->user();
+        $studentQuery = CourseEnrollment::query()
             ->with('user')
             ->where('course_id', $course->id)
             ->where('status', 'accepted')
-            ->orderBy('accepted_at')
-            ->get();
+            ->orderBy('accepted_at');
+
+        if (!$user->isAdmin()) {
+            $assignedStudentIds = \App\Models\TutorStudentAssignment::query()
+                ->where('course_id', $course->id)
+                ->where('tutor_user_id', $user->id)
+                ->where('status', 'active')
+                ->pluck('student_user_id');
+
+            $studentQuery->whereIn('user_id', $assignedStudentIds);
+        }
+
+        $students = $studentQuery->get();
 
         $grades = EvaluationGrade::query()
             ->where('course_id', $course->id)

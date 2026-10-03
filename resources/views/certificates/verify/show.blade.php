@@ -20,8 +20,8 @@
                                 <img src="{{ asset('storage/'.$logoPath) }}" alt="{{ $brandName }} logo" style="height: 44px; width: auto;">
                             @endif
                             <div>
-                                <div class="h5 mb-0">Certificate verification</div>
-                                <div class="text-secondary small">{{ $brandName }}</div>
+                                <div class="text-secondary small">Certificate verification</div>
+                                <div class="h5 mb-0">{{ $brandName }}</div>
                             </div>
                         </div>
 

@@ -107,9 +107,36 @@ class CourseEnrollmentController extends Controller
             'note' => $request->validated('note'),
         ]);
 
+        $tutors = \App\Models\CourseTutor::query()
+            ->where('course_id', $course->id)
+            ->where('status', 'active')
+            ->pluck('user_id');
+
+        if ($tutors->isNotEmpty()) {
+            $leastLoadedTutorId = \App\Models\TutorStudentAssignment::query()
+                ->where('course_id', $course->id)
+                ->whereIn('tutor_user_id', $tutors)
+                ->where('status', 'active')
+                ->selectRaw('tutor_user_id, count(*) as count')
+                ->groupBy('tutor_user_id')
+                ->orderBy('count', 'asc')
+                ->first()?->tutor_user_id;
+
+            $assignedTutorId = $leastLoadedTutorId ?? $tutors->first();
+
+            \App\Models\TutorStudentAssignment::create([
+                'course_id' => $course->id,
+                'tutor_user_id' => $assignedTutorId,
+                'student_user_id' => $enrollment->user_id,
+                'assigned_by' => $request->user()->id,
+                'assigned_at' => now(),
+                'status' => 'active',
+            ]);
+        }
+
         return redirect()
             ->route('courses.manage', $course)
-            ->with('status', 'Student accepted.');
+            ->with('status', 'Student accepted and auto-assigned to tutor.');
     }
 
     public function reject(CourseEnrollmentDecisionRequest $request, Course $course, CourseEnrollment $enrollment)

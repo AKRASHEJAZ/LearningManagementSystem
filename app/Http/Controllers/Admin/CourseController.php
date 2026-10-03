@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CourseStoreRequest;
 use App\Http\Requests\Admin\CourseUpdateRequest;
 use App\Models\Course;
+use App\Models\Evaluation;
 
 class CourseController extends Controller
 {
@@ -28,16 +29,31 @@ class CourseController extends Controller
     public function store(CourseStoreRequest $request)
     {
         $course = Course::query()->create([
-            'title' => $request->validated('title'),
-            'slug' => $request->preparedSlug(),
-            'summary' => $request->validated('summary'),
-            'duration' => $request->validated('duration'),
-            'description' => $request->validated('description'),
+            'title'               => $request->validated('title'),
+            'slug'                => $request->preparedSlug(),
+            'summary'             => $request->validated('summary'),
+            'duration'            => $request->validated('duration'),
+            'description'         => $request->validated('description'),
             'completion_criteria' => $request->validated('completion_criteria'),
-            'max_participants' => $request->validated('max_participants'),
-            'status' => $request->validated('status'),
-            'created_by' => $request->user()->id,
+            'max_participants'    => $request->validated('max_participants'),
+            'status'              => $request->validated('status'),
+            'created_by'          => $request->user()->id,
         ]);
+
+        foreach (array_values($request->validated('evaluations') ?? []) as $i => $ev) {
+            if (empty($ev['title'])) {
+                continue;
+            }
+            Evaluation::create([
+                'course_id'   => $course->id,
+                'title'       => $ev['title'],
+                'description' => $ev['description'] ?? null,
+                'max_score'   => $ev['max_score'] ?? null,
+                'is_required' => isset($ev['is_required']) ? (bool) $ev['is_required'] : true,
+                'position'    => $i + 1,
+                'created_by'  => $request->user()->id,
+            ]);
+        }
 
         return redirect()
             ->route('admin.courses.edit', $course)
@@ -46,8 +62,11 @@ class CourseController extends Controller
 
     public function edit(Course $course)
     {
+        $evaluations = $course->evaluations()->orderBy('position')->get();
+
         return view('admin.courses.edit', [
-            'course' => $course,
+            'course'      => $course,
+            'evaluations' => $evaluations,
         ]);
     }
 

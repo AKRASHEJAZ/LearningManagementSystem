@@ -24,14 +24,19 @@ class CourseStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'max:160'],
-            'slug' => ['nullable', 'string', 'max:180', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:courses,slug'],
-            'summary' => ['nullable', 'string', 'max:255'],
-            'duration' => ['nullable', 'string', 'max:50'],
-            'description' => ['nullable', 'string', 'max:20000'],
+            'title'               => ['required', 'string', 'max:160'],
+            'slug'                => ['nullable', 'string', 'max:180', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:courses,slug'],
+            'summary'             => ['nullable', 'string', 'max:255'],
+            'duration'            => ['nullable', 'string', 'max:50'],
+            'description'         => ['nullable', 'string', 'max:20000'],
             'completion_criteria' => ['nullable', 'string', 'max:20000'],
-            'max_participants' => ['nullable', 'integer', 'min:1', 'max:500'],
-            'status' => ['required', 'string', 'in:draft,published,archived'],
+            'max_participants'    => ['nullable', 'integer', 'min:1', 'max:500'],
+            'status'              => ['required', 'string', 'in:draft,published,archived'],
+            'evaluations'         => ['nullable', 'array'],
+            'evaluations.*.title'       => ['required_with:evaluations', 'string', 'max:160'],
+            'evaluations.*.max_score'   => ['nullable', 'integer', 'min:1', 'max:1000'],
+            'evaluations.*.description' => ['nullable', 'string', 'max:500'],
+            'evaluations.*.is_required' => ['nullable', 'boolean'],
         ];
     }
 

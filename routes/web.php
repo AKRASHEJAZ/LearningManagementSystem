@@ -68,23 +68,15 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         ->middleware('courseStaff:course')
         ->name('courses.manage.bulk-complete');
 
-    // Evaluations (course staff) + Grading (tutors only)
+    // Evaluations — view for all course staff, add/remove only for admins (locked after creation)
     Route::get('/courses/{course:slug}/evaluations', [CourseEvaluationController::class, 'index'])
         ->middleware('courseStaff:course')
         ->name('courses.evaluations.index');
     Route::post('/courses/{course:slug}/evaluations', [CourseEvaluationController::class, 'store'])
         ->middleware('courseStaff:course')
         ->name('courses.evaluations.store');
-    Route::get('/courses/{course:slug}/evaluations/{evaluation}/edit', [CourseEvaluationController::class, 'edit'])
-        ->middleware('courseStaff:course')
-        ->name('courses.evaluations.edit');
-    Route::put('/courses/{course:slug}/evaluations/{evaluation}', [CourseEvaluationController::class, 'update'])
-        ->middleware('courseStaff:course')
-        ->name('courses.evaluations.update');
-    Route::delete('/courses/{course:slug}/evaluations/{evaluation}', [CourseEvaluationController::class, 'destroy'])
-        ->middleware('courseStaff:course')
-        ->name('courses.evaluations.destroy');
 
+    // Grading (tutors only)
     Route::get('/courses/{course:slug}/grading', [CourseGradingController::class, 'show'])
         ->middleware('courseTutor:course')
         ->name('courses.grading.show');
@@ -98,15 +90,15 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         ->middleware('courseTutor:course')
         ->name('courses.grading.complete');
 
-    // Tutor↔student assignment mapping (course staff)
+    // Tutor↔student assignments — admin only (auto-assignment handles tutors)
     Route::get('/courses/{course:slug}/assignments', [CourseAssignmentController::class, 'index'])
-        ->middleware('courseStaff:course')
+        ->middleware('admin')
         ->name('courses.assignments.index');
     Route::post('/courses/{course:slug}/assignments', [CourseAssignmentController::class, 'store'])
-        ->middleware('courseStaff:course')
+        ->middleware('admin')
         ->name('courses.assignments.store');
     Route::delete('/courses/{course:slug}/assignments/{assignment}', [CourseAssignmentController::class, 'destroy'])
-        ->middleware('courseStaff:course')
+        ->middleware('admin')
         ->name('courses.assignments.destroy');
 
     Route::get('/my-learning', [MyLearningController::class, 'index'])->name('learning.index');

@@ -22,7 +22,8 @@ jobs:
           script: |
             set -e
 
-            APP_DIR="$HOME/domains/learn.gcmattendanceportal.com/public_html"
+            APP_DIR="$HOME/domains/
+            /public_html"
             BRANCH="main"
             REPO_URL="https://github.com/${{ github.repository }}.git"
             GH_AUTH="$(printf "x-access-token:${{ secrets.GITHUB_TOKEN }}" | base64 | tr -d '\n')"

@@ -84,7 +84,9 @@
                     <div class="text-secondary small">Manage evaluation items and grading.</div>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
-                    <a class="btn btn-sm btn-outline-secondary" href="{{ route('courses.assignments.index', $course->slug) }}">Assignments</a>
+                    @if(auth()->user()->isAdmin())
+                        <a class="btn btn-sm btn-outline-secondary" href="{{ route('courses.assignments.index', $course->slug) }}">Assignments</a>
+                    @endif
                     <a class="btn btn-sm btn-outline-secondary" href="{{ route('courses.evaluations.index', $course->slug) }}">Evaluations</a>
                     @php
                         $isTutorForCourse = \App\Models\CourseTutor::where('course_id', $course->id)
